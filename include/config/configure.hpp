@@ -80,9 +80,11 @@ namespace configure {
          *
          * @param key hierarchical key
          */
-        const std::string& operator[](const std::string& path) const;
+        const std::string& operator[](const std::string& key) const;
         
     private:
+        static constexpr char keydel{'.'};
+
         toml::table tree;
 
         /**
@@ -92,9 +94,16 @@ namespace configure {
          * exception is thrown if a parent node exists and is not a tabel or if
          * the target node exists and is not a string.
          *
-         * @param path full path to target node, *e.g.* "root.nested.value"
+         * @param key hierarchical key, *e.g.* "root.nested.value"
          */
-        void insert(const std::string& path);
+        void insert_string(const std::string& key);
+
+        /**
+         *
+         * @param key
+         */
+        toml::table& insert_table(const std::string& key);
+
     };
 
 }  // namespace

@@ -45,7 +45,7 @@ void Config::load(const std::filesystem::path& path) {
 string& Config::operator[](const string& key) {
     auto node{tree.at_path(key)};
     if (not node.is_string()) {
-        insert(key);
+        insert_string(key);
         node = tree.at_path(key);  // need to reassign to new node
     }
     return node.ref<string>();
@@ -61,13 +61,24 @@ const string& Config::operator[](const string& key) const {
 }
 
 
-void Config::insert(const std::string& path) {
-    static const char delimit{'.'};
+void Config::insert_string(const std::string& key) {
+    const auto pos{key.rfind(keydel)};
+    const auto parent{pos == string::npos ? "" : key.substr(0, pos)};
+    const auto leaf{pos == string::npos ? key : key.substr(pos + 1)};
+    toml::table& root{parent.empty() ? tree : insert_table(parent)};
+    if (root[leaf].type() != toml::node_type::none) {
+        throw invalid_argument{"target node '" + key + "' is not a string"};
+    }
+    root.emplace(leaf, toml::value<string>{});
+}
+
+
+toml::table& Config::insert_table(const string& key) {
     string parent;
-    for (auto it{path.begin()}; it != path.end(); ++it) {
-        // Create parent table nodes.
-        if (*it == delimit) {
-            parent.assign(path.begin(), it);
+    for (auto it{key.begin()}; it != key.end(); ++it) {
+        // Create parent nodes.
+        if (*it == keydel) {
+            parent.assign(key.begin(), it);
             if (tree.at_path(parent).type() == toml::node_type::none) {
                 tree.emplace(parent, toml::table());
             }
@@ -77,11 +88,5 @@ void Config::insert(const std::string& path) {
             ++it;  // skip delimiter
         }
     }
-    auto pos{path.rfind(delimit)};
-    const auto leaf{pos == string::npos ? path : path.substr(++pos)};
-    toml::table& root{path == leaf ? tree : tree.at_path(parent).ref<toml::table>()};
-    if (root[leaf].type() != toml::node_type::none) {
-        throw invalid_argument{"target node '" + path + "' is not a string"};
-    }
-    root.emplace(leaf, toml::value<string>{});
+    return tree.at_path(key).ref<toml::table>();
 }
