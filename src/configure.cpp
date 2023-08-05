@@ -32,13 +32,25 @@ Config::Config(const std::filesystem::path& path) {
 }
 
 
-void Config::load(istream& stream) {
-    tree = toml::parse(stream);
+void Config::load(istream& stream, const string& root) {
+    const auto table{toml::parse(stream)};
+    if (root.empty()) {
+        tree = table;
+    }
+    else {
+        insert_table(root) = table;
+    }
 }
 
 
-void Config::load(const std::filesystem::path& path) {
-    tree = toml::parse_file(path.string());
+void Config::load(const std::filesystem::path& path, const string& root) {
+    const auto table{toml::parse_file(path.string())};
+    if (root.empty()) {
+        tree = table;
+    }
+    else {
+        insert_table(root) = table;
+    }
 }
 
 
@@ -87,6 +99,14 @@ toml::table& Config::insert_table(const string& key) {
             }
             ++it;  // skip delimiter
         }
+    }
+    const auto pos{key.rfind(keydel)};
+    const auto leaf{pos == string::npos ? key : key.substr(pos + 1)};
+    if (parent.empty()) {
+        tree.emplace(leaf, toml::table());
+    }
+    else {
+        tree.at_path(parent).ref<toml::table>().emplace(leaf, toml::table());
     }
     return tree.at_path(key).ref<toml::table>();
 }

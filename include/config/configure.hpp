@@ -45,15 +45,17 @@ namespace configure {
          * Load config data from an input stream.
          *
          * @param stream TOML data stream
+         * @param root place data at this root
          */
-        void load(std::istream& stream);
+        void load(std::istream& stream, const std::string& root="");
 
         /**
          * Load config data from a file path.
          *
          * @param path TOML file path
+         * @param root place data at this root
          */
-        void load(const std::filesystem::path& path);
+        void load(const std::filesystem::path& path, const std::string& root="");
 
         /**
          * Writeable access to a string value.

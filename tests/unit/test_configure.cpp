@@ -33,8 +33,9 @@ using testing::Test;
 class ConfigTest: public Test {
 protected:
     const string path{"tests/unit/assets/config.toml"};
-    const vector<string> keys = {"key1", "key2"};
-    const vector<string> values = {"value1", "value2"};
+    const vector<string> prefixes{"", "section." , "section.table."};
+    const vector<string> keys{"key1", "key2"};
+    const vector<string> values{"value1", "value2"};
 };
 
 
@@ -44,10 +45,11 @@ protected:
 TEST_F(ConfigTest, ctor_stream) {
     ifstream stream{path};
     Config config{stream};
-    for (size_t pos(0); pos != keys.size(); ++pos) {
-        ASSERT_EQ(config[keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1." + keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1.table." + keys[pos]], values[pos]);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
     }
 }
 
@@ -57,10 +59,11 @@ TEST_F(ConfigTest, ctor_stream) {
  */
 TEST_F(ConfigTest, ctor_path) {
     Config config{path};
-    for (size_t pos(0); pos != keys.size(); ++ pos) {
-        ASSERT_EQ(config[keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1." + keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1.table." + keys[pos]], values[pos]);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
     }
 }
 
@@ -71,11 +74,29 @@ TEST_F(ConfigTest, ctor_path) {
 TEST_F(ConfigTest, load_stream) {
     ifstream stream{path};
     Config config;
-    config.load(path);
-    for (size_t pos(0); pos != keys.size(); ++pos) {
-        ASSERT_EQ(config[keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1." + keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1.table." + keys[pos]], values[pos]);
+    config.load(stream);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
+    }
+}
+
+
+/**
+ * Test the load method for a path with on optional root.
+ */
+TEST_F(ConfigTest, load_stream_root) {
+    static const string root{"sub"};
+    ifstream stream{path};
+    Config config;
+    config.load(stream, root);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{root + "." + prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
     }
 }
 
@@ -86,10 +107,27 @@ TEST_F(ConfigTest, load_stream) {
 TEST_F(ConfigTest, load_path) {
     Config config;
     config.load(path);
-    for (size_t pos{0}; pos != keys.size(); ++pos) {
-        ASSERT_EQ(config[keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1." + keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1.table." + keys[pos]], values[pos]);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
+    }
+}
+
+
+/**
+ * Test the load method for a path with on optional root.
+ */
+TEST_F(ConfigTest, load_path_root) {
+    static const string root{"sub"};
+    Config config;
+    config.load(path, root);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{root + "." + prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
     }
 }
 
@@ -100,10 +138,11 @@ TEST_F(ConfigTest, load_path) {
 TEST_F(ConfigTest, load_toml) {
     Config config;
     config.load(std::filesystem::path{path});
-    for (size_t pos{0}; pos != keys.size(); ++pos) {
-        ASSERT_EQ(config[keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1." + keys[pos]], values[pos]);
-        ASSERT_EQ(config["section1.table." + keys[pos]], values[pos]);
+    for (const auto& prefix: prefixes) {
+        for (size_t pos(0); pos != keys.size(); ++pos) {
+            const auto key{prefix + keys[pos]};
+            ASSERT_EQ(config[key], values[pos]);
+        }
     }
 }
 
@@ -125,7 +164,7 @@ TEST_F(ConfigTest, write) {
  */
 TEST_F(ConfigTest, write_fail) {
     Config config{path};
-    for (const auto key: {"section1", "section1.table"}) {
+    for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         ASSERT_THROW(config[key] = "abc", invalid_argument);
     }

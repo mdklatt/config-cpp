@@ -2,10 +2,10 @@
 key1 = "value1"
 key2 = "value2"
 
-[section1]
+[section]
 key1 = "value1"
 key2 = "value2"
 
-[section1.table]
+[section.table]
 key1 = "value1"
 key2 = "value2"
