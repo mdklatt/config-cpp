@@ -21,14 +21,12 @@ using testing::Test;
 
 
 /**
- * Test fixture for the configure test suite.
+ * Test fixture for the Config class test suite.
  *
  * This is used to group tests and provide common set-up and tear-down code.
  * A new test fixture is created for each test to prevent any side effects
  * between tests. Member variables and methods are injected into each test that
  * uses this fixture.
- *
- * This will be parametrized over all logging levels.
  */
 class ConfigTest: public Test {
 protected:
@@ -55,21 +53,7 @@ TEST_F(ConfigTest, ctor_stream) {
 
 
 /**
- * Test the file constructor.
- */
-TEST_F(ConfigTest, ctor_path) {
-    Config config{path};
-    for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
-        }
-    }
-}
-
-
-/**
- * Test the load method for a stream.
+ * Test the load() method for a stream.
  */
 TEST_F(ConfigTest, load_stream) {
     ifstream stream{path};
@@ -85,7 +69,7 @@ TEST_F(ConfigTest, load_stream) {
 
 
 /**
- * Test the load method for a path with on optional root.
+ * Test the load() method for a stream with on optional root.
  */
 TEST_F(ConfigTest, load_stream_root) {
     static const string root{"sub"};
@@ -102,46 +86,81 @@ TEST_F(ConfigTest, load_stream_root) {
 
 
 /**
- * Test the load method for a path.
+ * Type-parametrized fixture Config class path tests.
+ *
+ * This is used to group tests and provide common set-up and tear-down code.
+ * A new test fixture is created for each test to prevent any side effects
+ * between tests. Member variables and methods are injected into each test that
+ * uses this fixture.
  */
-TEST_F(ConfigTest, load_path) {
+template <typename T>
+class ConfigPathTest: public ConfigTest {};
+
+using PathTypes = ::testing::Types<string, std::filesystem::path>;
+TYPED_TEST_SUITE(ConfigPathTest, PathTypes);
+
+
+/**
+ * Test the path constructor.
+ */
+TYPED_TEST(ConfigPathTest, ctor_path) {
+    const TypeParam path{this->path};
+    Config config{path};
+    for (const auto& prefix: this->prefixes) {
+        for (size_t pos(0); pos != this->keys.size(); ++pos) {
+            const auto key{prefix + this->keys[pos]};
+            ASSERT_EQ(config[key], this->values[pos]);
+        }
+    }
+}
+
+
+/**
+ * Test the load() method for a path.
+ */
+TYPED_TEST(ConfigPathTest, load_path) {
+    const TypeParam path{this->path};
     Config config;
     config.load(path);
-    for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
+    for (const auto& prefix: this->prefixes) {
+        for (size_t pos(0); pos != this->keys.size(); ++pos) {
+            const auto key{prefix + this->keys[pos]};
+            ASSERT_EQ(config[key], this->values[pos]);
         }
     }
 }
 
 
 /**
- * Test the load method for a path with on optional root.
+ * Test the load() method for a path with on optional root.
  */
-TEST_F(ConfigTest, load_path_root) {
+TYPED_TEST(ConfigPathTest, load_path_root) {
     static const string root{"sub"};
+    const TypeParam path{this->path};
     Config config;
     config.load(path, root);
-    for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{root + "." + prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
+    for (const auto& prefix: this->prefixes) {
+        for (size_t pos(0); pos != this->keys.size(); ++pos) {
+            const auto key{root + "." + prefix + this->keys[pos]};
+            ASSERT_EQ(config[key], this->values[pos]);
         }
     }
 }
 
 
 /**
- * Test the load method for a path.
+ * Test the load() method for multiple calls.
  */
-TEST_F(ConfigTest, load_toml) {
+TEST_F(ConfigTest, load_multi) {
     Config config;
-    config.load(std::filesystem::path{path});
-    for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
+    config.load(path);
+    config.load(path, "sub");
+    for (const string& root: {"", "sub."}) {
+        for (const auto &prefix: prefixes) {
+            for (size_t pos(0); pos != keys.size(); ++pos) {
+                const auto key{root + prefix + keys[pos]};
+                ASSERT_EQ(config[key], values[pos]);
+            }
         }
     }
 }
