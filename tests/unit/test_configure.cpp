@@ -197,3 +197,13 @@ TEST_F(ConfigTest, read_fail) {
     const Config config{path};
     ASSERT_THROW(config["none"], invalid_argument);
 }
+
+
+/**
+ * Test the has_key() method.
+ */
+ TEST_F(ConfigTest, has_key) {
+     Config config{path};
+     ASSERT_TRUE(config.has_key("section.key1"));
+     ASSERT_FALSE(config.has_key("section.none"));
+ }

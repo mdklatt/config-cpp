@@ -73,6 +73,11 @@ const string& Config::operator[](const string& key) const {
 }
 
 
+bool Config::has_key(const string& key) const {
+    return tree.at_path(key).type() != toml::node_type::none;
+}
+
+
 void Config::insert_string(const std::string& key) {
     const auto pos{key.rfind(keydel)};
     const auto parent{pos == string::npos ? "" : key.substr(0, pos)};
