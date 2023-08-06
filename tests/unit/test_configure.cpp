@@ -21,14 +21,14 @@ using testing::Test;
 
 
 /**
- * Test fixture for the Config class test suite.
+ * Test fixture for the TomlConfig class test suite.
  *
  * This is used to group tests and provide common set-up and tear-down code.
  * A new test fixture is created for each test to prevent any side effects
  * between tests. Member variables and methods are injected into each test that
  * uses this fixture.
  */
-class ConfigTest: public Test {
+class TomlConfigTest: public Test {
 protected:
     const string path{"tests/unit/assets/config.toml"};
     const vector<string> prefixes{"", "section." , "section.table."};
@@ -40,9 +40,9 @@ protected:
 /**
  * Test the stream constructor.
  */
-TEST_F(ConfigTest, ctor_stream) {
+TEST_F(TomlConfigTest, ctor_stream) {
     ifstream stream{path};
-    Config config{stream};
+    TomlConfig config{stream};
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -58,9 +58,9 @@ TEST_F(ConfigTest, ctor_stream) {
 /**
  * Test the load() method for a stream.
  */
-TEST_F(ConfigTest, load_stream) {
+TEST_F(TomlConfigTest, load_stream) {
     ifstream stream{path};
-    Config config;
+    TomlConfig config;
     config.load(stream);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -77,10 +77,10 @@ TEST_F(ConfigTest, load_stream) {
 /**
  * Test the load() method for a stream with on optional root.
  */
-TEST_F(ConfigTest, load_stream_root) {
+TEST_F(TomlConfigTest, load_stream_root) {
     static const string root{"sub"};
     ifstream stream{path};
-    Config config;
+    TomlConfig config;
     config.load(stream, root);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -95,7 +95,7 @@ TEST_F(ConfigTest, load_stream_root) {
 
 
 /**
- * Type-parametrized fixture Config class path tests.
+ * Type-parametrized fixture for TomlConfig class path tests.
  *
  * This is used to group tests and provide common set-up and tear-down code.
  * A new test fixture is created for each test to prevent any side effects
@@ -103,18 +103,18 @@ TEST_F(ConfigTest, load_stream_root) {
  * uses this fixture.
  */
 template <typename T>
-class ConfigPathTest: public ConfigTest {};
+class TomlConfigPathTest: public TomlConfigTest {};
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
-TYPED_TEST_SUITE(ConfigPathTest, PathTypes);
+TYPED_TEST_SUITE(TomlConfigPathTest, PathTypes);
 
 
 /**
  * Test the path constructor.
  */
-TYPED_TEST(ConfigPathTest, ctor_path) {
+TYPED_TEST(TomlConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
-    Config config{path};
+    TomlConfig config{path};
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -130,9 +130,9 @@ TYPED_TEST(ConfigPathTest, ctor_path) {
 /**
  * Test the load() method for a path.
  */
-TYPED_TEST(ConfigPathTest, load_path) {
+TYPED_TEST(TomlConfigPathTest, load_path) {
     const TypeParam path{this->path};
-    Config config;
+    TomlConfig config;
     config.load(path);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -149,10 +149,10 @@ TYPED_TEST(ConfigPathTest, load_path) {
 /**
  * Test the load() method for a path with on optional root.
  */
-TYPED_TEST(ConfigPathTest, load_path_root) {
+TYPED_TEST(TomlConfigPathTest, load_path_root) {
     static const string root{"sub"};
     const TypeParam path{this->path};
-    Config config;
+    TomlConfig config;
     config.load(path, root);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -169,8 +169,8 @@ TYPED_TEST(ConfigPathTest, load_path_root) {
 /**
  * Test the load() method for multiple calls.
  */
-TEST_F(ConfigTest, load_multi) {
-    Config config;
+TEST_F(TomlConfigTest, load_multi) {
+    TomlConfig config;
     config.load(path);
     config.load(path, "sub");
     for (const string& root: {"", "sub."}) {
@@ -190,8 +190,8 @@ TEST_F(ConfigTest, load_multi) {
 /**
  * Test value write.
  */
-TEST_F(ConfigTest, write) {
-    Config config;
+TEST_F(TomlConfigTest, write) {
+    TomlConfig config;
     for (size_t pos(0); pos != keys.size(); ++pos) {
         config.at<string>(keys[pos]) = values[pos];
         ASSERT_EQ(config.at<string>(keys[pos]), values[pos]);
@@ -202,8 +202,8 @@ TEST_F(ConfigTest, write) {
 /**
  * Test value write failure.
  */
-TEST_F(ConfigTest, write_fail) {
-    Config config{path};
+TEST_F(TomlConfigTest, write_fail) {
+    TomlConfig config{path};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         ASSERT_THROW(config.at<string>(key) = "abc", invalid_argument);
@@ -214,8 +214,8 @@ TEST_F(ConfigTest, write_fail) {
 /**
  * Test value read failure.
  */
-TEST_F(ConfigTest, read_fail) {
-    const Config config{path};
+TEST_F(TomlConfigTest, read_fail) {
+    const TomlConfig config{path};
     ASSERT_THROW(config.at<string>("none"), invalid_argument);
 }
 
@@ -223,8 +223,8 @@ TEST_F(ConfigTest, read_fail) {
 /**
  * Test the has_key() method.
  */
- TEST_F(ConfigTest, has_key) {
-     Config config{path};
+ TEST_F(TomlConfigTest, has_key) {
+     TomlConfig config{path};
      ASSERT_TRUE(config.has_key("section.string"));
      ASSERT_FALSE(config.has_key("section.none"));
  }

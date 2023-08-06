@@ -23,26 +23,26 @@ namespace configure {
      * Keys are hierarchical and specify a complete path to their target
      * value using dotted components, *e.g.* "table.nested.value".
      */
-    class Config {
+    class TomlConfig {
     public:
         /**
          * Default constructor.
          */
-        Config() = default;
+        TomlConfig() = default;
 
         /**
          * Construct a Config object from an input stream.
          *
          * @param stream TOML data stream
          */
-        explicit Config(std::istream& stream);
+        explicit TomlConfig(std::istream& stream);
 
         /**
          * Construct a Config object from a file.
          *
          * @param path TOML file path
          */
-        explicit Config(const std::filesystem::path& path);
+        explicit TomlConfig(const std::filesystem::path& path);
 
         /**
          * Load config data from an input stream.

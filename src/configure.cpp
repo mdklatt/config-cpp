@@ -2,6 +2,7 @@
  * Implementation of the configure module.
  */
 #include "config/configure.hpp"
+#include <yaml-cpp/yaml.h>
 #include <istream>
 #include <stdexcept>
 
@@ -13,17 +14,17 @@ using std::string;
 using namespace configure;
 
 
-Config::Config(istream& stream) {
+TomlConfig::TomlConfig(istream& stream) {
     load(stream);
 }
 
 
-Config::Config(const std::filesystem::path& path) {
+TomlConfig::TomlConfig(const std::filesystem::path& path) {
     load(path);
 }
 
 
-void Config::load(istream& stream, const string& root) {
+void TomlConfig::load(istream& stream, const string& root) {
     const auto table{toml::parse(stream)};
     if (root.empty()) {
         tree = table;
@@ -34,7 +35,7 @@ void Config::load(istream& stream, const string& root) {
 }
 
 
-void Config::load(const std::filesystem::path& path, const string& root) {
+void TomlConfig::load(const std::filesystem::path& path, const string& root) {
     const auto table{toml::parse_file(path.string())};
     if (root.empty()) {
         tree = table;
@@ -46,42 +47,42 @@ void Config::load(const std::filesystem::path& path, const string& root) {
 
 
 template <>
-bool& Config::at<>(const string& key) {
+bool& TomlConfig::at<>(const string& key) {
     return at<bool>(key, toml::node_type::boolean);
 }
 
 
 template <>
-double& Config::at<>(const string& key) {
+double& TomlConfig::at<>(const string& key) {
     return at<double>(key, toml::node_type::floating_point);
 }
 
 
 template <>
-long long& Config::at<>(const string& key) {
+long long& TomlConfig::at<>(const string& key) {
     return at<long long>(key, toml::node_type::integer);
 }
 
 
 template <>
-string& Config::at<>(const string& key) {
+string& TomlConfig::at<>(const string& key) {
     return at<string>(key, toml::node_type::string);
 }
 
 
 template <>
-const string& Config::at<>(const string& key) const {
+const string& TomlConfig::at<>(const string& key) const {
     return at<string>(key, toml::node_type::string);
 }
 
 
-bool Config::has_key(const string& key) const {
+bool TomlConfig::has_key(const string& key) const {
     return tree.at_path(key).type() != toml::node_type::none;
 }
 
 
 template <typename T>
-T& Config::at(const string& key, const toml::node_type& type) {
+T& TomlConfig::at(const string& key, const toml::node_type& type) {
     auto node{tree.at_path(key)};
     if (node.type() != type) {
         insert<T>(key);
@@ -92,7 +93,7 @@ T& Config::at(const string& key, const toml::node_type& type) {
 
 
 template <typename T>
-const T& Config::at(const string& key, const toml::node_type& type) const {
+const T& TomlConfig::at(const string& key, const toml::node_type& type) const {
     const auto node{tree.at_path(key)};
     if (node.type() != type) {
         throw invalid_argument{"incorrect type for node '" + key + "'"};
@@ -102,7 +103,7 @@ const T& Config::at(const string& key, const toml::node_type& type) const {
 
 
 template <typename T>
-void Config::insert(const std::string& key) {
+void TomlConfig::insert(const std::string& key) {
     const auto pos{key.rfind(keydel)};
     const auto parent{pos == string::npos ? "" : key.substr(0, pos)};
     const auto leaf{pos == string::npos ? key : key.substr(pos + 1)};
@@ -114,7 +115,7 @@ void Config::insert(const std::string& key) {
 }
 
 
-toml::table& Config::insert_table(const string& key) {
+toml::table& TomlConfig::insert_table(const string& key) {
     string parent;
     for (auto it{key.begin()}; it != key.end(); ++it) {
         // Create parent nodes.
