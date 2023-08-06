@@ -1,11 +1,17 @@
 # Root section.
-key1 = "value1"
-key2 = "value2"
+bool = true
+float = 1.23
+int = 123
+string = "string"
 
 [section]
-key1 = "value1"
-key2 = "value2"
+bool = true
+float = 1.23
+int = 123
+string = "string"
 
 [section.table]
-key1 = "value1"
-key2 = "value2"
+bool = true
+float = 1.23
+int = 123
+string = "string"

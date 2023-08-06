@@ -2,22 +2,13 @@
  * Implementation of the configure module.
  */
 #include "config/configure.hpp"
-#include <fstream>
 #include <istream>
-#include <iterator>
-#include <list>
 #include <stdexcept>
 
 
-using std::getline;
 using std::invalid_argument;
 using std::istream;
-using std::list;
-using std::next;
-using std::out_of_range;
-using std::runtime_error;
 using std::string;
-using std::string_view;
 
 using namespace configure;
 
@@ -54,22 +45,33 @@ void Config::load(const std::filesystem::path& path, const string& root) {
 }
 
 
-string& Config::operator[](const string& key) {
-    auto node{tree.at_path(key)};
-    if (not node.is_string()) {
-        insert_string(key);
-        node = tree.at_path(key);  // need to reassign to new node
-    }
-    return node.ref<string>();
+template <>
+bool& Config::at<>(const string& key) {
+    return at<bool>(key, toml::node_type::boolean);
 }
-    
 
-const string& Config::operator[](const string& key) const {
-    const auto node{tree.at_path(key)};
-    if (not node.is_string()) {
-        throw invalid_argument{"node '" + key + "' is not a string"};
-    }
-    return node.ref<string>();
+
+template <>
+double& Config::at<>(const string& key) {
+    return at<double>(key, toml::node_type::floating_point);
+}
+
+
+template <>
+long long& Config::at<>(const string& key) {
+    return at<long long>(key, toml::node_type::integer);
+}
+
+
+template <>
+string& Config::at<>(const string& key) {
+    return at<string>(key, toml::node_type::string);
+}
+
+
+template <>
+const string& Config::at<>(const string& key) const {
+    return at<string>(key, toml::node_type::string);
 }
 
 
@@ -78,15 +80,37 @@ bool Config::has_key(const string& key) const {
 }
 
 
-void Config::insert_string(const std::string& key) {
+template <typename T>
+T& Config::at(const string& key, const toml::node_type& type) {
+    auto node{tree.at_path(key)};
+    if (node.type() != type) {
+        insert<T>(key);
+        node = tree.at_path(key);  // need to reassign to new node
+    }
+    return node.ref<T>();
+}
+
+
+template <typename T>
+const T& Config::at(const string& key, const toml::node_type& type) const {
+    const auto node{tree.at_path(key)};
+    if (node.type() != type) {
+        throw invalid_argument{"incorrect type for node '" + key + "'"};
+    }
+    return node.ref<T>();
+}
+
+
+template <typename T>
+void Config::insert(const std::string& key) {
     const auto pos{key.rfind(keydel)};
     const auto parent{pos == string::npos ? "" : key.substr(0, pos)};
     const auto leaf{pos == string::npos ? key : key.substr(pos + 1)};
     toml::table& root{parent.empty() ? tree : insert_table(parent)};
     if (root[leaf].type() != toml::node_type::none) {
-        throw invalid_argument{"target node '" + key + "' is not a string"};
+        throw invalid_argument{"incorrect type for node '" + key + "'"};
     }
-    root.emplace(leaf, toml::value<string>{});
+    root.emplace(leaf, toml::value<T>{});
 }
 
 

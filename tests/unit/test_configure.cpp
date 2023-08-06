@@ -7,7 +7,7 @@
 #include "config/configure.hpp"
 #include <gtest/gtest.h>
 #include <filesystem>
-#include <fstream>
+#include <istream>
 #include <stdexcept>
 #include <vector>
 
@@ -44,10 +44,13 @@ TEST_F(ConfigTest, ctor_stream) {
     ifstream stream{path};
     Config config{stream};
     for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -60,10 +63,13 @@ TEST_F(ConfigTest, load_stream) {
     Config config;
     config.load(stream);
     for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -77,10 +83,13 @@ TEST_F(ConfigTest, load_stream_root) {
     Config config;
     config.load(stream, root);
     for (const auto& prefix: prefixes) {
-        for (size_t pos(0); pos != keys.size(); ++pos) {
-            const auto key{root + "." + prefix + keys[pos]};
-            ASSERT_EQ(config[key], values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return root + "." + prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -107,10 +116,13 @@ TYPED_TEST(ConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
     Config config{path};
     for (const auto& prefix: this->prefixes) {
-        for (size_t pos(0); pos != this->keys.size(); ++pos) {
-            const auto key{prefix + this->keys[pos]};
-            ASSERT_EQ(config[key], this->values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -123,10 +135,13 @@ TYPED_TEST(ConfigPathTest, load_path) {
     Config config;
     config.load(path);
     for (const auto& prefix: this->prefixes) {
-        for (size_t pos(0); pos != this->keys.size(); ++pos) {
-            const auto key{prefix + this->keys[pos]};
-            ASSERT_EQ(config[key], this->values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -140,10 +155,13 @@ TYPED_TEST(ConfigPathTest, load_path_root) {
     Config config;
     config.load(path, root);
     for (const auto& prefix: this->prefixes) {
-        for (size_t pos(0); pos != this->keys.size(); ++pos) {
-            const auto key{root + "." + prefix + this->keys[pos]};
-            ASSERT_EQ(config[key], this->values[pos]);
-        }
+        const auto key = [&prefix](const string& name) {
+            return root + "." + prefix + name;
+        };
+        ASSERT_EQ(config.at<bool>(key("bool")), true);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
 
@@ -157,10 +175,13 @@ TEST_F(ConfigTest, load_multi) {
     config.load(path, "sub");
     for (const string& root: {"", "sub."}) {
         for (const auto &prefix: prefixes) {
-            for (size_t pos(0); pos != keys.size(); ++pos) {
-                const auto key{root + prefix + keys[pos]};
-                ASSERT_EQ(config[key], values[pos]);
-            }
+            const auto key = [&root, &prefix](const string& name) {
+                return root + prefix + name;
+            };
+            ASSERT_EQ(config.at<bool>(key("bool")), true);
+            ASSERT_EQ(config.at<long long>(key("int")), 123);
+            ASSERT_EQ(config.at<double>(key("float")), 1.23);
+            ASSERT_EQ(config.at<string>(key("string")), "string");
         }
     }
 }
@@ -172,8 +193,8 @@ TEST_F(ConfigTest, load_multi) {
 TEST_F(ConfigTest, write) {
     Config config;
     for (size_t pos(0); pos != keys.size(); ++pos) {
-        config[keys[pos]] = values[pos];
-        ASSERT_EQ(config[keys[pos]], values[pos]);
+        config.at<string>(keys[pos]) = values[pos];
+        ASSERT_EQ(config.at<string>(keys[pos]), values[pos]);
     }
 }
 
@@ -185,7 +206,7 @@ TEST_F(ConfigTest, write_fail) {
     Config config{path};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
-        ASSERT_THROW(config[key] = "abc", invalid_argument);
+        ASSERT_THROW(config.at<string>(key) = "abc", invalid_argument);
     }
 }
 
@@ -195,7 +216,7 @@ TEST_F(ConfigTest, write_fail) {
  */
 TEST_F(ConfigTest, read_fail) {
     const Config config{path};
-    ASSERT_THROW(config["none"], invalid_argument);
+    ASSERT_THROW(config.at<string>("none"), invalid_argument);
 }
 
 
@@ -204,6 +225,6 @@ TEST_F(ConfigTest, read_fail) {
  */
  TEST_F(ConfigTest, has_key) {
      Config config{path};
-     ASSERT_TRUE(config.has_key("section.key1"));
+     ASSERT_TRUE(config.has_key("section.string"));
      ASSERT_FALSE(config.has_key("section.none"));
  }
