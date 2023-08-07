@@ -5,6 +5,7 @@
  * test runner.
  */
 #include "config/configure.hpp"
+#include "config/yaml.hpp"
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <istream>
@@ -228,3 +229,57 @@ TEST_F(TomlConfigTest, read_fail) {
      ASSERT_TRUE(config.has_key("section.string"));
      ASSERT_FALSE(config.has_key("section.none"));
  }
+
+
+/**
+ * Test fixture for the TomlConfig class test suite.
+ *
+ * This is used to group tests and provide common set-up and tear-down code.
+ * A new test fixture is created for each test to prevent any side effects
+ * between tests. Member variables and methods are injected into each test that
+ * uses this fixture.
+ */
+class YamlConfigTest: public Test {
+protected:
+    const string path{"tests/unit/assets/config.yaml"};
+    const vector<string> prefixes{"", "section." , "section.table."};
+    const vector<string> keys{"key1", "key2"};
+    const vector<string> values{"value1", "value2"};
+};
+
+
+/**
+ * Test the stream constructor.
+ */
+TEST_F(YamlConfigTest, ctor_stream) {
+    ifstream stream{path};
+    YamlConfig config{stream};
+    for (const auto& prefix: prefixes) {
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<string>(key("bool")), "true");
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
+    }
+}
+
+
+/**
+ * Test the load() method for a stream.
+ */
+TEST_F(YamlConfigTest, load_stream) {
+    ifstream stream{path};
+    YamlConfig config;
+    config.load(stream);
+    for (const auto& prefix: prefixes) {
+        const auto key = [&prefix](const string& name) {
+            return prefix + name;
+        };
+        ASSERT_EQ(config.at<string>(key("bool")), "true");
+        ASSERT_EQ(config.at<double>(key("float")), 1.23);
+        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<string>(key("string")), "string");
+    }
+}

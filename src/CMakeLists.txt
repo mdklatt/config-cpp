@@ -10,10 +10,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tomlplusplus)
 
 
+FetchContent_Declare(
+    yaml-cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp
+    GIT_TAG yaml-cpp-0.7.0
+)
+FetchContent_MakeAvailable(yaml-cpp)
+
+
 # Define targets.
 
 add_library(${name}
     configure.cpp
+    yaml.cpp
 )
 add_library(config::config ALIAS config)
 
@@ -29,6 +38,7 @@ PRIVATE
 target_link_libraries(${name}
 PUBLIC
     tomlplusplus::tomlplusplus
+    yaml-cpp::yaml-cpp
 )
 
 

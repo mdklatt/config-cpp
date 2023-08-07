@@ -1,0 +1,15 @@
+bool: "true"
+float: 1.23
+int: 123
+string: "string"
+
+section:
+  bool: "true"
+  float: 1.23
+  int: 123
+  string: "string"
+  table:
+    bool: "true"
+    float: 1.23
+    int: 123
+    string: "string"
