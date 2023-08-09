@@ -2,6 +2,7 @@
  * Implementation of the configure module.
  */
 #include "config/configure.hpp"
+#include <cstdint>
 #include <istream>
 #include <stdexcept>
 
@@ -36,8 +37,8 @@ double& Config::at<>(const string& key) {
 
 
 template <>
-long long& Config::at<>(const string& key) {
-    return at<long long>(key, toml::node_type::integer);
+int64_t& Config::at<>(const string& key) {
+    return at<int64_t>(key, toml::node_type::integer);
 }
 
 

@@ -6,6 +6,7 @@
  */
 #include "config/configure.hpp"
 #include "config/yaml.hpp"
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <istream>
@@ -49,7 +50,7 @@ TEST_F(TomlConfigTest, ctor_stream) {
             return prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -68,7 +69,7 @@ TEST_F(TomlConfigTest, load_stream) {
             return prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -88,7 +89,7 @@ TEST_F(TomlConfigTest, load_stream_root) {
             return root + "." + prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -121,7 +122,7 @@ TYPED_TEST(TomlConfigPathTest, ctor_path) {
             return prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -140,7 +141,7 @@ TYPED_TEST(TomlConfigPathTest, load_path) {
             return prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -160,7 +161,7 @@ TYPED_TEST(TomlConfigPathTest, load_path_root) {
             return root + "." + prefix + name;
         };
         ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
@@ -180,7 +181,7 @@ TEST_F(TomlConfigTest, load_multi) {
                 return root + prefix + name;
             };
             ASSERT_EQ(config.at<bool>(key("bool")), true);
-            ASSERT_EQ(config.at<long long>(key("int")), 123);
+            ASSERT_EQ(config.at<int64_t>(key("int")), 123);
             ASSERT_EQ(config.at<double>(key("float")), 1.23);
             ASSERT_EQ(config.at<string>(key("string")), "string");
         }
@@ -260,7 +261,7 @@ TEST_F(YamlConfigTest, ctor_stream) {
         };
         ASSERT_EQ(config.at<string>(key("bool")), "true");
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
@@ -279,7 +280,7 @@ TEST_F(YamlConfigTest, load_stream) {
         };
         ASSERT_EQ(config.at<string>(key("bool")), "true");
         ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<long long>(key("int")), 123);
+        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
         ASSERT_EQ(config.at<string>(key("string")), "string");
     }
 }
