@@ -31,13 +31,31 @@ bool& Config::at<>(const string& key) {
 
 
 template <>
+const bool& Config::at<>(const string& key) const {
+    return at<bool>(key, toml::node_type::boolean);
+}
+
+
+template <>
 double& Config::at<>(const string& key) {
     return at<double>(key, toml::node_type::floating_point);
 }
 
 
 template <>
+const double& Config::at<>(const string& key) const {
+    return at<double>(key, toml::node_type::floating_point);
+}
+
+
+template <>
 int64_t& Config::at<>(const string& key) {
+    return at<int64_t>(key, toml::node_type::integer);
+}
+
+
+template <>
+const int64_t& Config::at<>(const string& key) const {
     return at<int64_t>(key, toml::node_type::integer);
 }
 

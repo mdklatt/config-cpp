@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(config
-    VERSION 0.1.0.7  # add build number to designate a dev version
+    VERSION 0.1.0.8  # add build number to designate a dev version
     LANGUAGES CXX
 )
 
