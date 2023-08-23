@@ -19,7 +19,7 @@
 namespace configure {
 
 /**
- * Abstract base class for configuration classes
+ * Abstract base class for configuration objects.
  */
 class Config {
 public:
@@ -40,30 +40,109 @@ public:
     void load(const std::filesystem::path& path, const std::string& root="");
 
     /**
-     * Writeable access to a value.
+     * Access a real number node.
      *
-     * A new value node will be created if it does not exist, including all
+     * A new node will be created if it does not exist, including all
      * parent nodes as necessary. An existing value must already have the
-     * correct type or a `std::invalid_argument` exception will be thrown.
+     * correct type or an exception will be thrown.
      *
-     * @tparam T value type (long long, double, bool, or std::string)
      * @param key hierarchical key
-     * @return value reference
+     * @return node value reference
      */
-    template<typename T>
-    T& at(const std::string& key);
+    double& as_real(const std::string& key);
 
     /**
-     * Read-only access to a value.
+     * Get the value of a real number node.
      *
-     * A `std::invalid_argument` exception will be thrown if the target is
-     * not an existing value of the correct type.
+     * An exception will be thrown if a node of the correct type does not
+     * already exist.
      *
-     * @tparam T value type (long long, double, bool, or std::string)
      * @param key hierarchical key
+     * @return node value reference
      */
-    template<typename T>
-    const T& at(const std::string& key) const;
+    const double& as_real(const std::string& key) const;
+
+    /**
+     * Get the value of a real number node.
+     *
+     * If the node does not exist, the fallback value will be returned. An
+     * exception will be thrown if the node exists but does not have the
+     * correct type.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    double as_real(const std::string& key, const double& fallback) const;
+
+    /**
+     * Access an integer node.
+     *
+     * A new node will be created if it does not exist, including all
+     * parent nodes as necessary. An existing value must already have the
+     * correct type or an exception will be thrown.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    int64_t& as_integer(const std::string& key);
+
+    /**
+     * Get the value of an integer node.
+     *
+     * An exception will be thrown if a node of the correct type does not
+     * already exist.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    const int64_t& as_integer(const std::string& key) const;
+
+    /**
+     * Get the value of an integer node.
+     *
+     * If the node does not exist, the fallback value will be returned. An
+     * exception will be thrown if the node exists but does not have the
+     * correct type.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    int64_t as_integer(const std::string& key, const int64_t& fallback) const;
+
+    /**
+     * Access a string node.
+     *
+     * A new node will be created if it does not exist, including all
+     * parent nodes as necessary. An existing value must already have the
+     * correct type or an exception will be thrown.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    std::string& as_string(const std::string& key);
+
+    /**
+     * Get the value of a string node.
+     *
+     * An exception will be thrown if a node of the correct type does not
+     * already exist.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    const std::string& as_string(const std::string& key) const;
+
+    /**
+     * Get the value of a string node.
+     *
+     * If the node does not exist, the fallback value will be returned. An
+     * exception will be thrown if the node exists but does not have the
+     * correct type.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    std::string as_string(const std::string& key, const std::string& fallback) const;
 
     /**
      * Test if key exists.
@@ -74,6 +153,9 @@ public:
     bool has_key(const std::string& key) const;
 
 protected:
+    /**
+     * 
+     */
     Config() = default;
 
     /**
@@ -91,6 +173,32 @@ protected:
      * @return TOML data structure
      */
     virtual toml::table parse(const std::filesystem::path& path) = 0;
+
+    /**
+     *
+     *
+     * @tparam T value type
+     * @param key hierarchical key
+     * @param type node type
+     * @param insert true to insert node if it does not exist
+     * @return value reference
+     */
+    template <typename T>
+    T& at(const std::string& key, const toml::node_type& type);
+
+    /**
+     *
+     *
+     * @tparam T native C++ value type
+     * @param key hierarchical key
+     * @param type node type
+     * @return value reference
+     */
+    template <typename T>
+    const T& at(const std::string& key, const toml::node_type& type) const;
+
+    template <typename T>
+    T at(const std::string& key, const toml::node_type& type, const T& fallback) const;
 
 private:
     static constexpr char keydel{'.'};
@@ -127,28 +235,6 @@ private:
      * @param key hierarchical key
      */
     toml::table& insert_table(const std::string& key);
-
-    /**
-     * Private implementation of at().
-     *
-     * @tparam T value type
-     * @param key hierarchical key
-     * @param type node type
-     * @return value reference
-     */
-    template <typename T>
-    T& at(const std::string& key, const toml::node_type& type);
-
-    /**
-     * Private implementation of at().
-     *
-     * @tparam T native C++ value type
-     * @param key hierarchical key
-     * @param type node type
-     * @return value reference
-     */
-    template <typename T>
-    const T& at(const std::string& key, const toml::node_type& type) const;
 };
 
 
@@ -178,6 +264,41 @@ public:
      * @param path TOML file path
      */
     explicit TomlConfig(const std::filesystem::path& path);
+
+    /**
+     * Access a boolean node.
+     *
+     * A new node will be created if it does not exist, including all
+     * parent nodes as necessary. An existing value must already have the
+     * correct type or an exception will be thrown.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    bool& as_boolean(const std::string &key);
+
+    /**
+     * Get the value of a boolean node.
+     *
+     * An exception will be thrown if a node of the correct type does not
+     * already exist.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    const bool& as_boolean(const std::string &key) const;
+
+    /**
+     * Get the value of a boolean node.
+     *
+     * If the node does not exist, the fallback value will be returned. An
+     * exception will be thrown if the node exists but does not have the
+     * correct type.
+     *
+     * @param key hierarchical key
+     * @return node value reference
+     */
+    bool as_boolean(const std::string &key, const bool& fallback) const;
 
 protected:
     /**

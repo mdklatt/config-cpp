@@ -14,70 +14,67 @@ using std::string;
 using namespace configure;
 
 
-void Config::load(istream& stream, const string& root) {
+void Config::load(istream& stream, const std::string& root) {
     load(parse(stream), root);
 }
 
 
-void Config::load(const std::filesystem::path& path, const string& root) {
+void Config::load(const std::filesystem::path& path, const std::string& root) {
     load(parse(path.string()), root);
 }
 
 
-template <>
-bool& Config::at<>(const string& key) {
-    return at<bool>(key, toml::node_type::boolean);
-}
-
-
-template <>
-const bool& Config::at<>(const string& key) const {
-    return at<bool>(key, toml::node_type::boolean);
-}
-
-
-template <>
-double& Config::at<>(const string& key) {
+double& Config::as_real(const std::string &key) {
     return at<double>(key, toml::node_type::floating_point);
 }
 
 
-template <>
-const double& Config::at<>(const string& key) const {
+const double& Config::as_real(const std::string &key) const {
     return at<double>(key, toml::node_type::floating_point);
 }
 
 
-template <>
-int64_t& Config::at<>(const string& key) {
+double Config::as_real(const std::string &key, const double& fallback) const {
+    return at<double>(key, toml::node_type::floating_point, fallback);
+}
+
+
+int64_t& Config::as_integer(const std::string &key) {
     return at<int64_t>(key, toml::node_type::integer);
 }
 
 
-template <>
-const int64_t& Config::at<>(const string& key) const {
+const int64_t& Config::as_integer(const std::string& key) const {
     return at<int64_t>(key, toml::node_type::integer);
 }
 
 
-template <>
-string& Config::at<>(const string& key) {
-    return at<string>(key, toml::node_type::string);
+int64_t Config::as_integer(const std::string& key, const int64_t& fallback) const {
+    return at<int64_t>(key, toml::node_type::integer, fallback);
 }
 
 
-template <>
-const string& Config::at<>(const string& key) const {
-    return at<string>(key, toml::node_type::string);
+string& Config::as_string(const std::string& key) {
+    return at<std::string>(key, toml::node_type::string);
 }
 
 
-bool Config::has_key(const string& key) const {
+const string& Config::as_string(const std::string &key) const {
+    return at<std::string>(key, toml::node_type::string);
+}
+
+
+string Config::as_string(const std::string &key, const std::string &fallback) const {
+    return at<std::string>(key, toml::node_type::string, fallback);
+}
+
+
+bool Config::has_key(const std::string& key) const {
     return tree.at_path(key).type() != toml::node_type::none;
 }
 
 
-void Config::load(const toml::table&& table, const string& root) {
+void Config::load(const toml::table&& table, const std::string& root) {
     if (root.empty()) {
         tree = table;
     }
@@ -88,7 +85,7 @@ void Config::load(const toml::table&& table, const string& root) {
 
 
 template <typename T>
-T& Config::at(const string& key, const toml::node_type& type) {
+T& Config::at(const std::string& key, const toml::node_type& type) {
     auto node{tree.at_path(key)};
     if (node.type() != type) {
         insert<T>(key);
@@ -99,12 +96,19 @@ T& Config::at(const string& key, const toml::node_type& type) {
 
 
 template <typename T>
-const T& Config::at(const string& key, const toml::node_type& type) const {
+const T& Config::at(const std::string& key, const toml::node_type& type) const {
     const auto node{tree.at_path(key)};
     if (node.type() != type) {
         throw invalid_argument{"incorrect type for node '" + key + "'"};
     }
     return node.ref<T>();
+}
+
+
+template <typename T>
+T Config::at(const std::string& key, const toml::node_type& type, const T& fallback) const {
+    const auto node{tree.at_path(key)};
+    return (node.type() == toml::node_type::none) ? fallback : at<T>(key, type);
 }
 
 
@@ -121,8 +125,8 @@ void Config::insert(const std::string& key) {
 }
 
 
-toml::table& Config::insert_table(const string& key) {
-    string parent;
+toml::table& Config::insert_table(const std::string& key) {
+    std::string parent;
     for (auto it{key.begin()}; it != key.end(); ++it) {
         // Create parent nodes.
         if (*it == keydel) {
@@ -155,6 +159,21 @@ TomlConfig::TomlConfig(istream& stream) {
 
 TomlConfig::TomlConfig(const std::filesystem::path& path) {
     load(path);
+}
+
+
+bool& TomlConfig::as_boolean(const std::string &key) {
+    return at<bool>(key, toml::node_type::boolean);
+}
+
+
+const bool& TomlConfig::as_boolean(const std::string &key) const {
+    return at<bool>(key, toml::node_type::boolean);
+}
+
+
+bool TomlConfig::as_boolean(const std::string &key, const bool& fallback) const {
+    return at<bool>(key, toml::node_type::boolean, fallback);
 }
 
 

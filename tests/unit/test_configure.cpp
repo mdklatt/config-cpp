@@ -49,10 +49,14 @@ TEST_F(TomlConfigTest, ctor_stream) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_boolean(key("boolx"), true), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_integer(key("intx"), 123), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_real(key("floatx"), 1.23), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
+        EXPECT_EQ(config.as_string(key("stringx"), "string"), "string");
     }
 }
 
@@ -68,10 +72,10 @@ TEST_F(TomlConfigTest, load_stream) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -88,10 +92,10 @@ TEST_F(TomlConfigTest, load_stream_root) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -121,10 +125,10 @@ TYPED_TEST(TomlConfigPathTest, ctor_path) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -140,10 +144,10 @@ TYPED_TEST(TomlConfigPathTest, load_path) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -160,10 +164,10 @@ TYPED_TEST(TomlConfigPathTest, load_path_root) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
         };
-        ASSERT_EQ(config.at<bool>(key("bool")), true);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_boolean(key("bool")), true);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -180,10 +184,10 @@ TEST_F(TomlConfigTest, load_multi) {
             const auto key = [&root, &prefix](const string& name) {
                 return root + prefix + name;
             };
-            ASSERT_EQ(config.at<bool>(key("bool")), true);
-            ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-            ASSERT_EQ(config.at<double>(key("float")), 1.23);
-            ASSERT_EQ(config.at<string>(key("string")), "string");
+            EXPECT_EQ(config.as_boolean(key("bool")), true);
+            EXPECT_EQ(config.as_integer(key("int")), 123);
+            EXPECT_EQ(config.as_real(key("float")), 1.23);
+            EXPECT_EQ(config.as_string(key("string")), "string");
         }
     }
 }
@@ -195,8 +199,8 @@ TEST_F(TomlConfigTest, load_multi) {
 TEST_F(TomlConfigTest, write) {
     TomlConfig config;
     for (size_t pos(0); pos != keys.size(); ++pos) {
-        config.at<string>(keys[pos]) = values[pos];
-        ASSERT_EQ(config.at<string>(keys[pos]), values[pos]);
+        config.as_string(keys[pos]) = values[pos];
+        EXPECT_EQ(config.as_string(keys[pos]), values[pos]);
     }
 }
 
@@ -208,7 +212,7 @@ TEST_F(TomlConfigTest, write_fail) {
     TomlConfig config{path};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
-        ASSERT_THROW(config.at<string>(key) = "abc", invalid_argument);
+        EXPECT_THROW(config.as_string(key) = "abc", invalid_argument);
     }
 }
 
@@ -218,7 +222,7 @@ TEST_F(TomlConfigTest, write_fail) {
  */
 TEST_F(TomlConfigTest, read_fail) {
     const TomlConfig config{path};
-    ASSERT_THROW(config.at<string>("none"), invalid_argument);
+    EXPECT_THROW(config.as_string("none"), invalid_argument);
 }
 
 
@@ -227,8 +231,8 @@ TEST_F(TomlConfigTest, read_fail) {
  */
  TEST_F(TomlConfigTest, has_key) {
      TomlConfig config{path};
-     ASSERT_TRUE(config.has_key("section.string"));
-     ASSERT_FALSE(config.has_key("section.none"));
+     EXPECT_TRUE(config.has_key("section.string"));
+     EXPECT_FALSE(config.has_key("section.none"));
  }
 
 
@@ -259,10 +263,10 @@ TEST_F(YamlConfigTest, ctor_stream) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<string>(key("bool")), "true");
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_string(key("bool")), "true");
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
 
@@ -278,9 +282,9 @@ TEST_F(YamlConfigTest, load_stream) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
         };
-        ASSERT_EQ(config.at<string>(key("bool")), "true");
-        ASSERT_EQ(config.at<double>(key("float")), 1.23);
-        ASSERT_EQ(config.at<int64_t>(key("int")), 123);
-        ASSERT_EQ(config.at<string>(key("string")), "string");
+        EXPECT_EQ(config.as_string(key("bool")), "true");
+        EXPECT_EQ(config.as_real(key("float")), 1.23);
+        EXPECT_EQ(config.as_integer(key("int")), 123);
+        EXPECT_EQ(config.as_string(key("string")), "string");
     }
 }
