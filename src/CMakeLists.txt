@@ -21,7 +21,8 @@ FetchContent_MakeAvailable(yaml-cpp)
 # Define targets.
 
 add_library(${name}
-    configure.cpp
+    config.cpp
+    toml.cpp
     yaml.cpp
 )
 add_library(config::config ALIAS config)

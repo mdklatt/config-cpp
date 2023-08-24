@@ -13,7 +13,8 @@ FetchContent_MakeAvailable(googletest)
 # Define targets.
 
 add_executable(test_${name}
-    test_configure.cpp
+    test_toml.cpp
+    test_yaml.cpp
 )
 target_link_libraries(test_${name}
 PRIVATE

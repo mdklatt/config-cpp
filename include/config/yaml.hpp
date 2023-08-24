@@ -1,17 +1,19 @@
 /**
- * 
+ * Handle YAML config files: <https://yaml.org>.
+ *
+ * @file
  */
 #ifndef CONFIG_YAML_HPP
 #define CONFIG_YAML_HPP
 
-#include "configure.hpp"
+#include "config.hpp"
 #include <toml++/toml.h>
 #include <yaml-cpp/yaml.h>
 
 
 namespace configure {
     /**
-     * Store TOML config data.
+     * Store YAML config data.
      *
      * Keys are hierarchical and specify a complete path to their target
      * value using dotted components, *e.g.* "table.nested.value".

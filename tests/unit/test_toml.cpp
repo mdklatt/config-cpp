@@ -1,11 +1,10 @@
 /**
- * Test suite for the configure module.
+ * Test suite for the config library.
  *
  * Link all test files with the `gtest_main` library to create a command-line 
  * test runner.
  */
-#include "config/configure.hpp"
-#include "config/yaml.hpp"
+#include "config/toml.hpp"
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <filesystem>
@@ -234,57 +233,3 @@ TEST_F(TomlConfigTest, read_fail) {
      EXPECT_TRUE(config.has_key("section.string"));
      EXPECT_FALSE(config.has_key("section.none"));
  }
-
-
-/**
- * Test fixture for the TomlConfig class test suite.
- *
- * This is used to group tests and provide common set-up and tear-down code.
- * A new test fixture is created for each test to prevent any side effects
- * between tests. Member variables and methods are injected into each test that
- * uses this fixture.
- */
-class YamlConfigTest: public Test {
-protected:
-    const string path{"tests/unit/assets/config.yaml"};
-    const vector<string> prefixes{"", "section." , "section.table."};
-    const vector<string> keys{"key1", "key2"};
-    const vector<string> values{"value1", "value2"};
-};
-
-
-/**
- * Test the stream constructor.
- */
-TEST_F(YamlConfigTest, ctor_stream) {
-    ifstream stream{path};
-    YamlConfig config{stream};
-    for (const auto& prefix: prefixes) {
-        const auto key = [&prefix](const string& name) {
-            return prefix + name;
-        };
-        EXPECT_EQ(config.as_string(key("bool")), "true");
-        EXPECT_EQ(config.as_real(key("float")), 1.23);
-        EXPECT_EQ(config.as_integer(key("int")), 123);
-        EXPECT_EQ(config.as_string(key("string")), "string");
-    }
-}
-
-
-/**
- * Test the load() method for a stream.
- */
-TEST_F(YamlConfigTest, load_stream) {
-    ifstream stream{path};
-    YamlConfig config;
-    config.load(stream);
-    for (const auto& prefix: prefixes) {
-        const auto key = [&prefix](const string& name) {
-            return prefix + name;
-        };
-        EXPECT_EQ(config.as_string(key("bool")), "true");
-        EXPECT_EQ(config.as_real(key("float")), 1.23);
-        EXPECT_EQ(config.as_integer(key("int")), 123);
-        EXPECT_EQ(config.as_string(key("string")), "string");
-    }
-}
