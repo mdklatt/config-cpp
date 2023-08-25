@@ -1,10 +1,10 @@
 /**
- * Test suite for the 'yaml' module.
+ * Test suite for the config library.
  *
  * Link all test files with the `gtest_main` library to create a command-line 
  * test runner.
  */
-#include "config/yaml.hpp"
+#include "config/json.hpp"
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <istream>
@@ -21,16 +21,16 @@ using testing::Test;
 
 
 /**
- * Test fixture for the YamlConfig class test suite.
+ * Test fixture for the JsonConfig class test suite.
  *
  * This is used to group tests and provide common set-up and tear-down code.
  * A new test fixture is created for each test to prevent any side effects
  * between tests. Member variables and methods are injected into each test that
  * uses this fixture.
  */
-class YamlConfigTest: public Test {
+class JsonConfigTest: public Test {
 protected:
-    const string path{"tests/unit/assets/config.yaml"};
+    const string path{"tests/unit/assets/config.json"};
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
@@ -40,9 +40,9 @@ protected:
 /**
  * Test the stream constructor.
  */
-TEST_F(YamlConfigTest, ctor_stream) {
+TEST_F(JsonConfigTest, ctor_stream) {
     ifstream stream{path};
-    YamlConfig config{stream};
+    JsonConfig config{stream};
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -60,9 +60,9 @@ TEST_F(YamlConfigTest, ctor_stream) {
 /**
  * Test the load() method for a stream.
  */
-TEST_F(YamlConfigTest, load_stream) {
+TEST_F(JsonConfigTest, load_stream) {
     ifstream stream{path};
-    YamlConfig config;
+    JsonConfig config;
     config.load(stream);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -78,10 +78,10 @@ TEST_F(YamlConfigTest, load_stream) {
 /**
  * Test the load() method for a stream with on optional root.
  */
-TEST_F(YamlConfigTest, load_stream_root) {
+TEST_F(JsonConfigTest, load_stream_root) {
     static const string root{"sub"};
     ifstream stream{path};
-    YamlConfig config;
+    JsonConfig config;
     config.load(stream, root);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -95,7 +95,7 @@ TEST_F(YamlConfigTest, load_stream_root) {
 
 
 /**
- * Type-parametrized fixture for YamlConfig class path tests.
+ * Type-parametrized fixture for JsonConfig class path tests.
  *
  * This is used to group tests and provide common set-up and tear-down code.
  * A new test fixture is created for each test to prevent any side effects
@@ -103,18 +103,18 @@ TEST_F(YamlConfigTest, load_stream_root) {
  * uses this fixture.
  */
 template <typename T>
-class YamlConfigPathTest: public YamlConfigTest {};
+class JsonConfigPathTest: public JsonConfigTest {};
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
-TYPED_TEST_SUITE(YamlConfigPathTest, PathTypes);
+TYPED_TEST_SUITE(JsonConfigPathTest, PathTypes);
 
 
 /**
  * Test the path constructor.
  */
-TYPED_TEST(YamlConfigPathTest, ctor_path) {
+TYPED_TEST(JsonConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
-    YamlConfig config{path};
+    JsonConfig config{path};
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -129,9 +129,9 @@ TYPED_TEST(YamlConfigPathTest, ctor_path) {
 /**
  * Test the load() method for a path.
  */
-TYPED_TEST(YamlConfigPathTest, load_path) {
+TYPED_TEST(JsonConfigPathTest, load_path) {
     const TypeParam path{this->path};
-    YamlConfig config;
+    JsonConfig config;
     config.load(path);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -147,10 +147,10 @@ TYPED_TEST(YamlConfigPathTest, load_path) {
 /**
  * Test the load() method for a path with on optional root.
  */
-TYPED_TEST(YamlConfigPathTest, load_path_root) {
+TYPED_TEST(JsonConfigPathTest, load_path_root) {
     static const string root{"sub"};
     const TypeParam path{this->path};
-    YamlConfig config;
+    JsonConfig config;
     config.load(path, root);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
@@ -166,8 +166,8 @@ TYPED_TEST(YamlConfigPathTest, load_path_root) {
 /**
  * Test the load() method for multiple calls.
  */
-TEST_F(YamlConfigTest, load_multi) {
-    YamlConfig config;
+TEST_F(JsonConfigTest, load_multi) {
+    JsonConfig config;
     config.load(path);
     config.load(path, "sub");
     for (const string& root: {"", "sub."}) {
@@ -186,8 +186,8 @@ TEST_F(YamlConfigTest, load_multi) {
 /**
  * Test value write.
  */
-TEST_F(YamlConfigTest, write) {
-    YamlConfig config;
+TEST_F(JsonConfigTest, write) {
+    JsonConfig config;
     for (size_t pos(0); pos != keys.size(); ++pos) {
         config.as_string(keys[pos]) = values[pos];
         EXPECT_EQ(config.as_string(keys[pos]), values[pos]);
@@ -198,8 +198,8 @@ TEST_F(YamlConfigTest, write) {
 /**
  * Test value write failure.
  */
-TEST_F(YamlConfigTest, write_fail) {
-    YamlConfig config{path};
+TEST_F(JsonConfigTest, write_fail) {
+    JsonConfig config{path};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         EXPECT_THROW(config.as_string(key) = "abc", invalid_argument);
@@ -210,8 +210,8 @@ TEST_F(YamlConfigTest, write_fail) {
 /**
  * Test value read failure.
  */
-TEST_F(YamlConfigTest, read_fail) {
-    const YamlConfig config{path};
+TEST_F(JsonConfigTest, read_fail) {
+    const JsonConfig config{path};
     EXPECT_THROW(config.as_string("none"), invalid_argument);
 }
 
@@ -219,8 +219,8 @@ TEST_F(YamlConfigTest, read_fail) {
 /**
  * Test the has_key() method.
  */
-TEST_F(YamlConfigTest, has_key) {
-    YamlConfig config{path};
+TEST_F(JsonConfigTest, has_key) {
+    JsonConfig config{path};
     EXPECT_TRUE(config.has_key("section.string"));
     EXPECT_FALSE(config.has_key("section.none"));
 }

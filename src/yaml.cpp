@@ -1,6 +1,3 @@
-/**
- *
- */
 #include "config/yaml.hpp"
 #include <yaml-cpp/yaml.h>
 #include <cstdlib>
@@ -58,7 +55,7 @@ YamlConfig::YamlConfig(istream& stream, const string& root) {
 }
 
 
-YamlConfig::YamlConfig(const std::filesystem::path& path,  const string& root) {
+YamlConfig::YamlConfig(const std::filesystem::path& path, const string& root) {
     load(path, root);
 }
 

@@ -22,6 +22,7 @@ FetchContent_MakeAvailable(yaml-cpp)
 
 add_library(${name}
     config.cpp
+    json.cpp
     toml.cpp
     yaml.cpp
 )

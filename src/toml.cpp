@@ -1,6 +1,3 @@
-/**
- * Implementation of the toml module.
- */
 #include "config/toml.hpp"
 #include <cstdint>
 #include <istream>

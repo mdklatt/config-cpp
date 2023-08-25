@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(test_${name}
     test_toml.cpp
     test_yaml.cpp
+    test_json.cpp
 )
 target_link_libraries(test_${name}
 PRIVATE

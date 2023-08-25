@@ -1,11 +1,10 @@
 /**
- * Test suite for the config library.
+ * Test suite for the 'toml' module.
  *
  * Link all test files with the `gtest_main` library to create a command-line 
  * test runner.
  */
 #include "config/toml.hpp"
-#include <cstdint>
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <istream>
@@ -32,7 +31,7 @@ using testing::Test;
 class TomlConfigTest: public Test {
 protected:
     const string path{"tests/unit/assets/config.toml"};
-    const vector<string> prefixes{"", "section." , "section.table."};
+    const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
 };
