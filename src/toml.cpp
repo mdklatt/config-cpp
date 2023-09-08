@@ -1,11 +1,13 @@
 #include "config/toml.hpp"
 #include <cstdint>
 #include <istream>
+#include <sstream>
 #include <stdexcept>
 
 
 using std::invalid_argument;
 using std::istream;
+using std::ostringstream;
 using std::string;
 
 using namespace configure;
@@ -37,7 +39,14 @@ bool TomlConfig::as_boolean(const std::string &key, const bool& fallback) const 
 
 
 toml::table TomlConfig::parse(istream& stream) {
-    return toml::parse(stream);
+    // The toml::parse() function produces an empty table when the input
+    // stream is backed by a StreamBuffer. No idea why this is happening
+    // because StreamBuffer works fine with the file types. As a workaround,
+    // read the input into a string first, then parse it.
+    // FIXME: return toml::parse(stream);
+    ostringstream buffer;
+    buffer << stream.rdbuf();
+    return toml::parse(buffer.str());
 }
 
 

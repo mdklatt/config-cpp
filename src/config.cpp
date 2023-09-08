@@ -1,9 +1,10 @@
 /**
  * Implementation of the configure module.
  */
+#include "streambuf.hpp"
 #include "config/config.hpp"
 #include <stdexcept>
-
+#include <sstream>
 
 using std::invalid_argument;
 using std::istream;
@@ -12,7 +13,9 @@ using std::string;
 using namespace configure;
 
 
-void Config::load(istream& stream, const std::string& root) {
+void Config::load(istream& stream, const string& root) {
+    StreamBuffer buffer{stream.rdbuf()};
+    stream.rdbuf(&buffer);
     load(parse(stream), root);
 }
 
