@@ -3,6 +3,7 @@
  */
 #include "streambuf.hpp"
 #include "config/config.hpp"
+#include <fstream>
 #include <stdexcept>
 #include <sstream>
 
@@ -14,9 +15,35 @@ using namespace configure;
 
 
 void Config::load(istream& stream, const string& root) {
-    StreamBuffer buffer{stream.rdbuf()};
+//    StreamBuffer buffer{stream.rdbuf()};
+//    stream.rdbuf(&buffer);
+    load(parse(stream), root);
+}
+
+
+void Config::load(istream& stream, const string& root, const Params& params) {
+    StreamBuffer buffer{stream.rdbuf(), params};
     stream.rdbuf(&buffer);
     load(parse(stream), root);
+}
+
+
+void Config::load(istream& stream, const Params& params) {
+    StreamBuffer buffer{stream.rdbuf(), params};
+    stream.rdbuf(&buffer);
+    load(parse(stream), "");
+}
+
+
+void Config::load(const std::filesystem::path& path, const std::string& root, const Params& params) {
+    std::ifstream stream{path};
+    load(stream, root, params);
+}
+
+
+void Config::load(const std::filesystem::path& path, const Params& params) {
+    std::ifstream stream{path};
+    load(stream, params);
 }
 
 
@@ -25,7 +52,7 @@ void Config::load(const std::filesystem::path& path, const std::string& root) {
 }
 
 
-double& Config::as_real(const std::string &key) {
+double& Config::as_real(const std::string& key) {
     return at<double>(key, toml::node_type::floating_point);
 }
 

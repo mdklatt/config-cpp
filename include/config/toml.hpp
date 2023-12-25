@@ -30,18 +30,35 @@ public:
     TomlConfig() = default;
 
     /**
-     * Construct a Config object from an input stream.
+     * Construct a Config object from a stream.
      *
      * @param stream TOML data stream
      */
     explicit TomlConfig(std::istream& stream);
 
     /**
-     * Construct a Config object from a file.
+     * Construct an object from a stream with parameter substitution.
+     *
+     * @param stream TOML data stream
+     * @param params parameter substitutions
+     */
+    TomlConfig(std::istream& stream, const Params& params);
+
+    /**
+     * Construct an object from a file.
      *
      * @param path TOML file path
+     * @param param parameter substitutions
      */
     explicit TomlConfig(const std::filesystem::path& path);
+
+    /**
+     * Construct an object from a file.
+     *
+     * @param path TOML file path
+     * @param param parameter substitutions
+     */
+    TomlConfig(const std::filesystem::path& path, const Params& params);
 
     /**
      * Access a boolean node.

@@ -24,21 +24,37 @@ namespace configure {
  */
 class Config {
 public:
+    using Params = std::map<std::string, std::string>;
+
     /**
      * Load config data from an input stream.
      *
      * @param stream input stream
      * @param root place data at this root
+     * @param params parameter substitutions
      */
+    void load(std::istream& stream, const std::string& root, const Params& params);
+
+    /** @overload */
     void load(std::istream& stream, const std::string& root="");
+
+    /** @overload */
+    void load(std::istream& stream, const Params& params);
 
     /**
      * Load config data from a file path.
      *
      * @param path input file path
      * @param root place data at this root
+     * @param params parameter substitutions
      */
+    void load(const std::filesystem::path& path, const std::string& root, const Params& params);
+
+    /** overload */
     void load(const std::filesystem::path& path, const std::string& root="");
+
+    /** overload */
+    void load(const std::filesystem::path& path, const Params& params);
 
     /**
      * Access a real number node.

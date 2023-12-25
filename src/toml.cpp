@@ -18,8 +18,18 @@ TomlConfig::TomlConfig(istream& stream) {
 }
 
 
+TomlConfig::TomlConfig(istream& stream, const Params& params) {
+    load(stream, params);
+}
+
+
 TomlConfig::TomlConfig(const std::filesystem::path& path) {
     load(path);
+}
+
+
+TomlConfig::TomlConfig(const std::filesystem::path& path, const Params& params) {
+    load(path, params);
 }
 
 
@@ -46,6 +56,7 @@ toml::table TomlConfig::parse(istream& stream) {
     // FIXME: return toml::parse(stream);
     ostringstream buffer;
     buffer << stream.rdbuf();
+    const auto conf{buffer.str()};
     return toml::parse(buffer.str());
 }
 

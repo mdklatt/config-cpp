@@ -22,7 +22,7 @@ public:
      * @param source source buffer
      * @param params mapping of parameter substitutions
      */
-    explicit StreamBuffer(std::streambuf* source, const std::map<std::string, std::string>& = {});
+    explicit StreamBuffer(std::streambuf* source, const std::map<std::string, std::string>& params = {});
 
 protected:
     using std::streambuf::int_type;
@@ -41,6 +41,7 @@ private:
     static constexpr int_type eof{traits_type::eof()};
     static constexpr std::vector<char>::size_type buflen{1024};
     const std::map<std::string, std::string> params;
+    void replace(std::string& key);
     std::streambuf* source;
     std::vector<char> buffer;
 };

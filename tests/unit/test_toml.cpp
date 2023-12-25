@@ -34,6 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
+    const Config::Params params{{"str", "string"}};
 };
 
 
@@ -42,7 +43,7 @@ protected:
  */
 TEST_F(TomlConfigTest, ctor_stream) {
     ifstream stream{path};
-    TomlConfig config{stream};
+    TomlConfig config{stream, params};
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -65,7 +66,7 @@ TEST_F(TomlConfigTest, ctor_stream) {
 TEST_F(TomlConfigTest, load_stream) {
     ifstream stream{path};
     TomlConfig config;
-    config.load(stream);
+    config.load(stream, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -85,7 +86,7 @@ TEST_F(TomlConfigTest, load_stream_root) {
     static const string root{"sub"};
     ifstream stream{path};
     TomlConfig config;
-    config.load(stream, root);
+    config.load(stream, root, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -107,7 +108,10 @@ TEST_F(TomlConfigTest, load_stream_root) {
  * uses this fixture.
  */
 template <typename T>
-class TomlConfigPathTest: public TomlConfigTest {};
+class TomlConfigPathTest: public TomlConfigTest {
+protected:
+    const Config::Params params{{"str", "string"}};
+};
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
 TYPED_TEST_SUITE(TomlConfigPathTest, PathTypes);
@@ -118,7 +122,7 @@ TYPED_TEST_SUITE(TomlConfigPathTest, PathTypes);
  */
 TYPED_TEST(TomlConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
-    TomlConfig config{path};
+    TomlConfig config{path, this->params};
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -137,7 +141,7 @@ TYPED_TEST(TomlConfigPathTest, ctor_path) {
 TYPED_TEST(TomlConfigPathTest, load_path) {
     const TypeParam path{this->path};
     TomlConfig config;
-    config.load(path);
+    config.load(path, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -157,7 +161,7 @@ TYPED_TEST(TomlConfigPathTest, load_path_root) {
     static const string root{"sub"};
     const TypeParam path{this->path};
     TomlConfig config;
-    config.load(path, root);
+    config.load(path, root, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -175,8 +179,8 @@ TYPED_TEST(TomlConfigPathTest, load_path_root) {
  */
 TEST_F(TomlConfigTest, load_multi) {
     TomlConfig config;
-    config.load(path);
-    config.load(path, "sub");
+    config.load(path, params);
+    config.load(path, "sub", params);
     for (const string& root: {"", "sub."}) {
         for (const auto &prefix: prefixes) {
             const auto key = [&root, &prefix](const string& name) {

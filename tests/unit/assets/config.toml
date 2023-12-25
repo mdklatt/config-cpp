@@ -2,7 +2,7 @@
 bool = true
 float = 1.23
 int = 123
-string = "string"
+string = "${str}"
 
 [section]
 bool = true
