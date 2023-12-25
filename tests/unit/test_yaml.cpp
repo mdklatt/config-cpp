@@ -34,6 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
+    const YamlConfig::Params params{{"str", "string"}};
 };
 
 
@@ -42,7 +43,7 @@ protected:
  */
 TEST_F(YamlConfigTest, ctor_stream) {
     ifstream stream{path};
-    YamlConfig config{stream};
+    YamlConfig config{stream, params};
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -63,7 +64,7 @@ TEST_F(YamlConfigTest, ctor_stream) {
 TEST_F(YamlConfigTest, load_stream) {
     ifstream stream{path};
     YamlConfig config;
-    config.load(stream);
+    config.load(stream, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -82,7 +83,7 @@ TEST_F(YamlConfigTest, load_stream_root) {
     static const string root{"sub"};
     ifstream stream{path};
     YamlConfig config;
-    config.load(stream, root);
+    config.load(stream, root, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -103,7 +104,10 @@ TEST_F(YamlConfigTest, load_stream_root) {
  * uses this fixture.
  */
 template <typename T>
-class YamlConfigPathTest: public YamlConfigTest {};
+class YamlConfigPathTest: public YamlConfigTest {
+protected:
+    const YamlConfig::Params params{{"str", "string"}};
+};
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
 TYPED_TEST_SUITE(YamlConfigPathTest, PathTypes);
@@ -114,7 +118,7 @@ TYPED_TEST_SUITE(YamlConfigPathTest, PathTypes);
  */
 TYPED_TEST(YamlConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
-    YamlConfig config{path};
+    YamlConfig config{path, this->params};
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -132,7 +136,7 @@ TYPED_TEST(YamlConfigPathTest, ctor_path) {
 TYPED_TEST(YamlConfigPathTest, load_path) {
     const TypeParam path{this->path};
     YamlConfig config;
-    config.load(path);
+    config.load(path, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -151,7 +155,7 @@ TYPED_TEST(YamlConfigPathTest, load_path_root) {
     static const string root{"sub"};
     const TypeParam path{this->path};
     YamlConfig config;
-    config.load(path, root);
+    config.load(path, root, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -168,8 +172,8 @@ TYPED_TEST(YamlConfigPathTest, load_path_root) {
  */
 TEST_F(YamlConfigTest, load_multi) {
     YamlConfig config;
-    config.load(path);
-    config.load(path, "sub");
+    config.load(path, this->params);
+    config.load(path, "sub", this->params);
     for (const string& root: {"", "sub."}) {
         for (const auto &prefix: prefixes) {
             const auto key = [&root, &prefix](const string& name) {

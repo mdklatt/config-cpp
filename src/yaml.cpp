@@ -49,14 +49,23 @@ public:
 }
 
 
-
-YamlConfig::YamlConfig(istream& stream, const string& root) {
-    load(stream, root);
+YamlConfig::YamlConfig(istream& stream) {
+    load(stream);
 }
 
 
-YamlConfig::YamlConfig(const std::filesystem::path& path, const string& root) {
-    load(path, root);
+YamlConfig::YamlConfig(istream& stream, const Params& params) {
+    load(stream, params);
+}
+
+
+YamlConfig::YamlConfig(const std::filesystem::path& path) {
+    load(path);
+}
+
+
+YamlConfig::YamlConfig(const std::filesystem::path& path, const Params& params) {
+    load(path, params);
 }
 
 

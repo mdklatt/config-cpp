@@ -26,18 +26,24 @@ namespace configure {
         YamlConfig() = default;
 
         /**
-         * Construct a YamlConfig object from an input stream.
+         * Construct an object from a stream.
          *
          * @param stream TOML data stream
          */
-        explicit YamlConfig(std::istream& stream, const std::string& root="");
+        explicit YamlConfig(std::istream& stream);
 
         /**
-         * Construct a YamlConfig object from a file.
+         * Construct an object from a stream with parameter substitution.
          *
-         * @param path TOML file path
+         * @param stream TOML data stream
+         * @param params parameter substitutions
          */
-        explicit YamlConfig(const std::filesystem::path& path, const std::string& root="");
+        YamlConfig(std::istream& stream, const Params& params);
+
+
+        explicit YamlConfig(const std::filesystem::path& path);
+        YamlConfig(const std::filesystem::path& path, const Params& params);
+
 
     protected:
         /**
