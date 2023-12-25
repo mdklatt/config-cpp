@@ -41,14 +41,11 @@ StreamBuffer::int_type StreamBuffer::underflow() {
             auto c{source->sbumpc()};
             if (c == eof) {
                 // End of input.
-                if (not open_param) {
-                    break;
+                if (open_param) {
+                    // FIXME: Continue reading from stream.
+                    throw runtime_error{"incomplete parameter"};
                 }
-                if (open_brace) {
-                    throw std::runtime_error("missing '}' in input");
-                }
-                replace();
-                open_param = false;
+                break;
             }
             else if (c == '$') {
                 const auto next{source->sbumpc()};
@@ -69,10 +66,10 @@ StreamBuffer::int_type StreamBuffer::underflow() {
                     source->sputbackc(next);
                 }
             }
-            else if (c == '{') {
-                throw std::runtime_error("unexpected { in input");
-            }
             else if ((c == '}' or (c == '\n')) and open_param) {
+                if (c == '}' and not open_brace) {
+                    throw runtime_error{"unexpected '}' in input"};
+                }
                 replace();
                 open_param = false;
                 open_brace = false;

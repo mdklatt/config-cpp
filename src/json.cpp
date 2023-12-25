@@ -6,11 +6,21 @@ using std::string;
 using namespace configure;
 
 
-JsonConfig::JsonConfig(istream& stream, const string& root) {
-    load(stream, root);
+JsonConfig::JsonConfig(istream& stream) {
+    load(stream);
 }
 
 
-JsonConfig::JsonConfig(const std::filesystem::path& path, const string& root) {
-    load(path, root);
+JsonConfig::JsonConfig(istream& stream, const Params& params) {
+    load(stream, params);
+}
+
+
+JsonConfig::JsonConfig(const std::filesystem::path& path) {
+    load(path);
+}
+
+
+JsonConfig::JsonConfig(const std::filesystem::path& path, const Params& params) {
+    load(path, params);
 }

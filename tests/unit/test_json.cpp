@@ -34,6 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
+    const JsonConfig::Params params{{"str", "string"}};
 };
 
 
@@ -42,7 +43,7 @@ protected:
  */
 TEST_F(JsonConfigTest, ctor_stream) {
     ifstream stream{path};
-    JsonConfig config{stream};
+    JsonConfig config{stream, params};
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -63,7 +64,7 @@ TEST_F(JsonConfigTest, ctor_stream) {
 TEST_F(JsonConfigTest, load_stream) {
     ifstream stream{path};
     JsonConfig config;
-    config.load(stream);
+    config.load(stream, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -82,7 +83,7 @@ TEST_F(JsonConfigTest, load_stream_root) {
     static const string root{"sub"};
     ifstream stream{path};
     JsonConfig config;
-    config.load(stream, root);
+    config.load(stream, root, params);
     for (const auto& prefix: prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -103,7 +104,10 @@ TEST_F(JsonConfigTest, load_stream_root) {
  * uses this fixture.
  */
 template <typename T>
-class JsonConfigPathTest: public JsonConfigTest {};
+class JsonConfigPathTest: public JsonConfigTest {
+protected:
+    const JsonConfig::Params params{{"str", "string"}};
+};
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
 TYPED_TEST_SUITE(JsonConfigPathTest, PathTypes);
@@ -114,7 +118,7 @@ TYPED_TEST_SUITE(JsonConfigPathTest, PathTypes);
  */
 TYPED_TEST(JsonConfigPathTest, ctor_path) {
     const TypeParam path{this->path};
-    JsonConfig config{path};
+    JsonConfig config{path, this->params};
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -132,7 +136,7 @@ TYPED_TEST(JsonConfigPathTest, ctor_path) {
 TYPED_TEST(JsonConfigPathTest, load_path) {
     const TypeParam path{this->path};
     JsonConfig config;
-    config.load(path);
+    config.load(path, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return prefix + name;
@@ -151,7 +155,7 @@ TYPED_TEST(JsonConfigPathTest, load_path_root) {
     static const string root{"sub"};
     const TypeParam path{this->path};
     JsonConfig config;
-    config.load(path, root);
+    config.load(path, root, this->params);
     for (const auto& prefix: this->prefixes) {
         const auto key = [&prefix](const string& name) {
             return root + "." + prefix + name;
@@ -168,8 +172,8 @@ TYPED_TEST(JsonConfigPathTest, load_path_root) {
  */
 TEST_F(JsonConfigTest, load_multi) {
     JsonConfig config;
-    config.load(path);
-    config.load(path, "sub");
+    config.load(path, params);
+    config.load(path, "sub", params);
     for (const string& root: {"", "sub."}) {
         for (const auto &prefix: prefixes) {
             const auto key = [&root, &prefix](const string& name) {

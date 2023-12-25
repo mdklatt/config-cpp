@@ -25,18 +25,34 @@ namespace configure {
         JsonConfig() = default;
 
         /**
-         * Construct a JsonConfig object from an input stream.
+         * Construct an object from a stream.
          *
          * @param stream TOML data stream
          */
-        explicit JsonConfig(std::istream& stream, const std::string& root="");
+        explicit JsonConfig(std::istream& stream);
 
         /**
-         * Construct a JsonConfig object from a file.
+         * Construct an object from a stream with parameter substitution
+         *
+         * @param stream TOML data stream
+         * @param params parameter substitutions
+         */
+        JsonConfig(std::istream& stream, const Params& params);
+
+        /**
+         * Construct an object from a file.
          *
          * @param path TOML file path
          */
-        explicit JsonConfig(const std::filesystem::path& path, const std::string& root="");
+        explicit JsonConfig(const std::filesystem::path& path);
+
+        /**
+         * Construct an object from a stream with parameter substitution.
+         *
+         * @param path TOML file path
+         * @param params parameter substitutions
+         */
+        JsonConfig(const std::filesystem::path& path, const Params &params);
 
 
         // TODO: Add support for boolean values.
