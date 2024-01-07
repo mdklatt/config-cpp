@@ -41,9 +41,9 @@ private:
     static constexpr int_type eof{traits_type::eof()};
     static constexpr std::vector<char>::size_type buflen{1024};
     const std::map<std::string, std::string> params;
-    void replace(std::string& key);
+    void replace();
     std::streambuf* source;
-    std::vector<char> buffer;
+    std::string buffer;
 };
 
 }  // namespace config
