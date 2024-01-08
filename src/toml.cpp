@@ -1,5 +1,4 @@
 #include "config/toml.hpp"
-#include <cstdint>
 #include <istream>
 #include <sstream>
 #include <stdexcept>

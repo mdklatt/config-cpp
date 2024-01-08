@@ -262,7 +262,7 @@ private:
      * @param key hierarchical key
      */
     template <typename T>
-    void insert(const std::string& key);
+    void insert_value(const std::string& key);
 
     /**
      * Insert a new table node at the given location.

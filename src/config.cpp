@@ -15,8 +15,8 @@ using namespace configure;
 
 
 void Config::load(istream& stream, const string& root) {
-//    StreamBuffer buffer{stream.rdbuf()};
-//    stream.rdbuf(&buffer);
+    StreamBuffer buffer{stream.rdbuf()};
+    stream.rdbuf(&buffer);
     load(parse(stream), root);
 }
 
@@ -116,7 +116,7 @@ template <typename T>
 T& Config::at(const std::string& key, const toml::node_type& type) {
     auto node{tree.at_path(key)};
     if (node.type() != type) {
-        insert<T>(key);
+        insert_value<T>(key);
         node = tree.at_path(key);  // need to reassign to new node
     }
     return node.ref<T>();
@@ -141,7 +141,7 @@ T Config::at(const std::string& key, const toml::node_type& type, const T& fallb
 
 
 template <typename T>
-void Config::insert(const std::string& key) {
+void Config::insert_value(const std::string& key) {
     const auto pos{key.rfind(keydel)};
     const auto parent{pos == string::npos ? "" : key.substr(0, pos)};
     const auto leaf{pos == string::npos ? key : key.substr(pos + 1)};
