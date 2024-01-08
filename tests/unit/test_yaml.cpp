@@ -34,7 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
-    const YamlConfig::Params params{{"str", "string"}};
+    const YamlConfig::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 
@@ -106,7 +106,7 @@ TEST_F(YamlConfigTest, load_stream_root) {
 template <typename T>
 class YamlConfigPathTest: public YamlConfigTest {
 protected:
-    const YamlConfig::Params params{{"str", "string"}};
+    const YamlConfig::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
@@ -203,7 +203,7 @@ TEST_F(YamlConfigTest, write) {
  * Test value write failure.
  */
 TEST_F(YamlConfigTest, write_fail) {
-    YamlConfig config{path};
+    YamlConfig config{path, params};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         EXPECT_THROW(config.as_string(key) = "abc", invalid_argument);
@@ -215,7 +215,7 @@ TEST_F(YamlConfigTest, write_fail) {
  * Test value read failure.
  */
 TEST_F(YamlConfigTest, read_fail) {
-    const YamlConfig config{path};
+    const YamlConfig config{path, params};
     EXPECT_THROW(config.as_string("none"), invalid_argument);
 }
 
@@ -224,8 +224,7 @@ TEST_F(YamlConfigTest, read_fail) {
  * Test the has_key() method.
  */
 TEST_F(YamlConfigTest, has_key) {
-    YamlConfig config{path};
+    YamlConfig config{path, params};
     EXPECT_TRUE(config.has_key("section.string"));
     EXPECT_FALSE(config.has_key("section.none"));
 }
-

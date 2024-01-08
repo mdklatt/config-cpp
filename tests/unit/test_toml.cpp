@@ -34,7 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
-    const Config::Params params{{"str", "string"}};
+    const Config::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 
@@ -110,7 +110,7 @@ TEST_F(TomlConfigTest, load_stream_root) {
 template <typename T>
 class TomlConfigPathTest: public TomlConfigTest {
 protected:
-    const Config::Params params{{"str", "string"}};
+    const Config::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
@@ -211,7 +211,7 @@ TEST_F(TomlConfigTest, write) {
  * Test value write failure.
  */
 TEST_F(TomlConfigTest, write_fail) {
-    TomlConfig config{path};
+    TomlConfig config{path, params};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         EXPECT_THROW(config.as_string(key) = "abc", invalid_argument);
@@ -223,7 +223,7 @@ TEST_F(TomlConfigTest, write_fail) {
  * Test value read failure.
  */
 TEST_F(TomlConfigTest, read_fail) {
-    const TomlConfig config{path};
+    const TomlConfig config{path, params};
     EXPECT_THROW(config.as_string("none"), invalid_argument);
 }
 
@@ -232,7 +232,7 @@ TEST_F(TomlConfigTest, read_fail) {
  * Test the has_key() method.
  */
  TEST_F(TomlConfigTest, has_key) {
-     TomlConfig config{path};
+     TomlConfig config{path, params};
      EXPECT_TRUE(config.has_key("section.string"));
      EXPECT_FALSE(config.has_key("section.none"));
  }

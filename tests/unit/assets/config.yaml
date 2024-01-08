@@ -1,6 +1,6 @@
 bool: "true"
 float: 1.23
-int: 123
+int: ${int}
 string: ${str}
 
 section:
@@ -12,4 +12,4 @@ section:
     bool: "true"
     float: 1.23
     int: 123
-    string: "string"
+    string: "${str}"

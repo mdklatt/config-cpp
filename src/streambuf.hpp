@@ -43,7 +43,9 @@ private:
     const std::map<std::string, std::string> params;
     void replace();
     std::streambuf* source;
+    ssize_t count;
     std::string buffer;
+    std::string remainder;
 };
 
 }  // namespace config

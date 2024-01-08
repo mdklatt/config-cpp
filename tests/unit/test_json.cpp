@@ -34,7 +34,7 @@ protected:
     const vector<string> prefixes{"", "section.", "section.table."};
     const vector<string> keys{"key1", "key2"};
     const vector<string> values{"value1", "value2"};
-    const JsonConfig::Params params{{"str", "string"}};
+    const JsonConfig::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 
@@ -106,7 +106,7 @@ TEST_F(JsonConfigTest, load_stream_root) {
 template <typename T>
 class JsonConfigPathTest: public JsonConfigTest {
 protected:
-    const JsonConfig::Params params{{"str", "string"}};
+    const JsonConfig::Params params{{"str", "string"}, {"int", "123"}};
 };
 
 using PathTypes = ::testing::Types<string, std::filesystem::path>;
@@ -203,7 +203,7 @@ TEST_F(JsonConfigTest, write) {
  * Test value write failure.
  */
 TEST_F(JsonConfigTest, write_fail) {
-    JsonConfig config{path};
+    JsonConfig config{path, params};
     for (const auto key: {"section", "section.table"}) {
         // Cannot overwrite non-string nodes.
         EXPECT_THROW(config.as_string(key) = "abc", invalid_argument);
@@ -215,7 +215,7 @@ TEST_F(JsonConfigTest, write_fail) {
  * Test value read failure.
  */
 TEST_F(JsonConfigTest, read_fail) {
-    const JsonConfig config{path};
+    const JsonConfig config{path, params};
     EXPECT_THROW(config.as_string("none"), invalid_argument);
 }
 
@@ -224,7 +224,7 @@ TEST_F(JsonConfigTest, read_fail) {
  * Test the has_key() method.
  */
 TEST_F(JsonConfigTest, has_key) {
-    JsonConfig config{path};
+    JsonConfig config{path, params};
     EXPECT_TRUE(config.has_key("section.string"));
     EXPECT_FALSE(config.has_key("section.none"));
 }

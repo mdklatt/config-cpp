@@ -1,7 +1,7 @@
 {
   "bool": true,
   "float": 1.23,
-  "int": 123,
+  "int": ${int},
   "string": "${str}",
   "section": {
     "bool": true,
